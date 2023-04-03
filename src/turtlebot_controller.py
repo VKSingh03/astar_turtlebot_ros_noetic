@@ -7,45 +7,72 @@ from geometry_msgs.msg import Twist
 from controller_manager_msgs.srv import ListControllers, ListControllersRequest
 from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest
 import math
+import os
+import rospkg
 
-def publisher(states):
+def publisher():
     t = Twist()
     pub_move = rospy.Publisher('/cmd_vel', Twist, queue_size=10) 
     rospy.init_node('astar_publisher', anonymous=True)
     rate = rospy.Rate(1)
+    rate_= 0.5
     wheel_radius= 0.033
     wheel_distance= 0.16
-    theta = 60
+    theta = 0
     x_vel = 0
     y_vel = 0
     ang_vel = 0
-    # states = [(5,5), (10,5), (5,5), (5, 20), (5,5), (5,5), (10,5)]
+    read = False
+    states = []
+    while (read == False):
+        try:
+            print('Inside try')
+            rp = rospkg.RosPack()
+            package_path = rp.get_path("astar_turtlebot")
+            print(package_path)
+            filepath = os.path.join(package_path,'src/actions.txt')
+            print(filepath)
+            with open(filepath, 'r') as f:
+                print('Inside while')
+                # Read the lines of the file
+                lines = f.readlines()
+                lines = [line.strip() for line in lines]
+                for line in lines:
+                    # Split the line into values
+                    values_list = line.split()
+                    # Convert the values to integers and store them as a tuple
+                    # values_tuple = (int(values_list[0]), int(values_list[1]), values_list[2])
+                    values_tuple = (int(values_list[0]), int(values_list[1]))
+                    # Append the tuple to the list of values
+                    states.append(values_tuple)
+                read = True
+        except:
+            continue
 
-    # states = [(0,0), (40,40), (40,50),( 50,40), (40,50), (50,40), (40,50), (50,40), (40,50), (50,40), (40,50), (50,40), (40,50), (50,40)]
-    # while not rospy.is_shutdown():
-    for i in range(10):
+    for i in range(5):
         rate.sleep()
-    for left_rpm,right_rpm in states:
+    for right_rpm,left_rpm in states:
 
-        # left_velocity = left_rpm * wheel_radius * 2 * 3.14 / 60
-        # right_velocity = right_rpm * wheel_radius * 2 * 3.14 / 60
+        left_velocity = left_rpm * wheel_radius * 2 * 3.14 / 60
+        right_velocity = right_rpm * wheel_radius * 2 * 3.14 / 60
 
-        # # Compute the robot's linear and angular velocities
-        # linear_velocity = (left_velocity + right_velocity) / 2
-        # angular_velocity = (right_velocity - left_velocity) / wheel_distance
+        # Compute the robot's linear and angular velocities
+        x_vel = (left_velocity + right_velocity) / 2
+        ang_vel = (right_velocity - left_velocity) / wheel_distance
         
-        ang_vel =(wheel_radius/wheel_distance)*(right_rpm - left_rpm)
+        # ang_vel =(wheel_radius/wheel_distance)*(right_rpm - left_rpm)
 
-        x_vel = 0.5*wheel_radius*(right_rpm+left_rpm)*math.cos(theta)
-        y_vel = 0.5*wheel_radius*(right_rpm+left_rpm)*math.sin(theta)
+        # x_vel = 0.5*wheel_radius*(right_rpm+left_rpm)*math.cos(theta*3.14/180)
+        # y_vel = 0.5*wheel_radius*(right_rpm+left_rpm)*math.sin(theta*3.14/180)
         for i in range(10):
             theta = theta + ang_vel*0.1
-        theta = round(theta)%360
-        data_str = "Pubishing Commands to Topics, " + str(x_vel) + " , "+ str(ang_vel)+ ","+str(theta)
-        rospy.loginfo(data_str)
+        theta = theta%(math.pi)
+        # data_str = "Pubishing Commands to Topics, " + str(x_vel) + " , "+ str(ang_vel)+ ","+str(theta)
+        # rospy.loginfo(data_str)
+        print(str(x_vel), " , ", str(ang_vel), ","+str(theta), ",", left_rpm, right_rpm)
         t.angular.z = ang_vel
         t.linear.x = x_vel
-        t.linear.y = y_vel
+        # t.linear.y = y_vel/(10*rate_)
         pub_move.publish(t)
         rate.sleep()
 
@@ -81,25 +108,9 @@ def publisher(states):
 
 
 if __name__ == '__main__':
-    read = False
-    values = []
+
     # rospy.loginfo("Waiting for path to be generated")
-    while (read == False):
-        try:
-            with open('actions.txt', 'r') as f:
-                # Read the lines of the file
-                lines = f.readlines()
-                lines = [line.strip() for line in lines]
-                for line in lines:
-                    # Split the line into values
-                    values_list = line.split()
-                    # Convert the values to integers and store them as a tuple
-                    values_tuple = (int(values_list[0]), int(values_list[1]))
-                    # Append the tuple to the list of values
-                    values.append(values_tuple)
-                read = True
-        except:
-            continue
+    
     
     # print(values)
     # exit(0)
@@ -119,6 +130,6 @@ if __name__ == '__main__':
     #     # Append the tuple to the list of values
     #     values.append(values_tuple)
     try:
-        publisher(values)
+        publisher()
     except rospy.ROSInterruptException:
         pass
