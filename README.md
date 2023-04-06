@@ -45,15 +45,38 @@ To run the program, clone the package in catkin workspace and then follow the be
 + Source the workspace after build is complete
 + Run the following command 
 
-    roslaunch astar_turtlebot gazebo.launch init_state:="0 0 0" goal_state:="4.8 -0.5 0" rpm1:=10 rpm2:=15 obj_clear:=5 robot_clear:=20
-
-Output Video: https://youtu.be/8U9iF_QIr0E
+      roslaunch astar_turtlebot gazebo.launch 
 
 
-Note: 
-+ The speeds for Left and right wheels should be given after consideration of turtlebot max limit for speed/acceleration. For proper outputs, keep it within 20 rpm for each wheel. 
-+ The inputs and goal points should be given with reference to ROS map. If initial state is given other than (0 0 0), then it should also be changed in Launch file before starting the node. 
-+ As the package already contains an actions.txt, the turtlebot will not wait for the new file to be generated. If a new action set is to be generated, the existing actions.txt should be deleted and then the above launch file should be run again. 
++ Enter the values for each prompt (tested values given in Note below).  
++ The program will output the final backtracked path as OpenCV prompt window. Select the OpenCV prompt window and **Press Enter**.
++ Turtlebot will start following the path in gazebo and values will be dispalyed on the terminal. 
+  
+
+
+### Note: 
++ The speeds for Left and right wheels should be given after consideration of turtlebot max limit for speed/acceleration. For proper outputs, keep it within 20 rpm for each wheel, and difference between both rpms to be within 10 for optimal performance. 
++ The inputs and goal points should be given with reference to ROS map. If initial state is given other than (0 0 0), then it should also be changed in Launch file before starting the node to correctly spawn the robot. 
++ As the controller is open loop, the robot might not follow the exact path as per the final action set. So we suggest using the same inputs as given below, as this is already tested. 
+  + Enter robot clearance: 20
+  + Enter object clearance: 5
+  + Enter robot left rpm: 15
+  + Enter robot right rpm: 10
+  + Enter Start X: 0
+  + Enter Start Y: 0
+  + Enter Start Theta: 0
+  + Enter Goal X: 4.8
+  + Enter Goal Y: -0.5
+  + Enter Goal Theta: 0
++ Robot Clearance should be at least 20 for optimal performance. 
++ The program will first execute A* and generate set of actions to reach the goal which will be stored as actions.txt. 
++ Turtlebot controller node reads the actions.txt and drives the robot as per the actions to reach the final destination.
+
+
+## Output Video: 
+https://youtu.be/9bkgCtHp0WE -  Shows the complete process
+https://youtu.be/8U9iF_QIr0E -  Shows comparison with backtracked path
+
 
 ## Github Link
 [Repository](https://github.com/VKSingh03/astar_turtlebot_ros_noetic.git)
