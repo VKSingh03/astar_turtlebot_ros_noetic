@@ -41,10 +41,12 @@ Note: The output videos in both cases is created as .avi which is converted to .
 
 To run the program, clone the package in catkin workspace and then follow the below steps:  
 
-
-
 Output Video: https://youtu.be/8U9iF_QIr0E
 
+
+Note: 
++ The speeds for Left and right wheels should be given after consideration of turtlebot max limit for speed/acceleration. For proper outputs, keep it within 20 rpm for each wheel. 
++ The inputs and goal points should be given with reference to ROS map. If initial state is given other than (0 0 0), then it should also be changed in Launch file before starting the node. 
 
 ## Github Link
 [Repository](https://github.com/VKSingh03/astar_turtlebot_ros_noetic.git)
