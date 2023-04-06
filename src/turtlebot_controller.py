@@ -57,7 +57,7 @@ class Robot:
                 print(str(x_robot), " , ", str(ang_vel), ","+str(theta), ",", left_rpm, right_rpm)
                 self.t.angular.z = self.rate_*ang_vel/1.6
                 self.t.linear.x = x_robot/7.0
-                self.pub_move.publish(t)
+                self.pub_move.publish(self.t)
                 self.rate.sleep()
 
     def callback(self,msg):

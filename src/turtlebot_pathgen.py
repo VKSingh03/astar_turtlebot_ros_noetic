@@ -20,8 +20,8 @@ class Astar:
         self.result = cv2.VideoWriter("Astar02.avi", cv2.VideoWriter_fourcc(*'MJPG'), 600, (width, height))
         
         # Define constants
-        self.START=None
-        self.GOAL=None
+        # self.START=None
+        # self.GOAL=None
         self.SCALE=scale
         self.WIDTH=width
         self.HEIGHT=height
@@ -244,6 +244,7 @@ class Astar:
         # Write each sublist to the file, with elements separated by a space
             for row in actions:
                 line = ' '.join(str(elem) for elem in row) + '\n'
+                print(line)
                 file.write(line)
         path=[]
         for p in points:
@@ -273,7 +274,7 @@ class Astar:
         thetag=np.rad2deg(thetag)
         xg=round(xg+del_xn)
         yg=round(yg+del_yn)
-        thetag=round(thetag)%360
+        thetag=int(round(thetag)%360)
         if xg>=0 and yg>=0 and xg<self.HEIGHT and yg<self.WIDTH:
 #       Cost,CostToGoal,Parent,Idx,State,CostToCome,Track
                 if self.check_robot((xg,yg)):
@@ -371,6 +372,7 @@ class Astar:
                                 self.visited[neighbor[4][0],neighbor[4][1]]=neighbor[0]
 
                             else:
+                                print(neighbor)
                                 if self.visited[neighbor[4][0],neighbor[4][1],neighbor[4][2]]>current[5]+cost_of_action:
                                     neighbor[2]=current[3]
                                     neighbor[5]=current[5]+cost_of_action
