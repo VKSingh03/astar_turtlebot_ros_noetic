@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
+
 import rospy
-from std_msgs.msg import String
-from std_msgs.msg import Float64
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
-from controller_manager_msgs.srv import ListControllers, ListControllersRequest
-from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest
 import math
 import os
 import rospkg
@@ -25,7 +22,6 @@ class Robot:
         
 
     def publisher(self,states):
-        
         theta = 0
         x_vel = 0
         y_vel = 0
@@ -52,9 +48,7 @@ class Robot:
                 for i in range(10):
                     theta = theta + ang_vel*0.1
                 theta = theta%(math.pi)
-                # data_str = "Pubishing Commands to Topics, " + str(x_vel) + " , "+ str(ang_vel)+ ","+str(theta)
-                # rospy.loginfo(data_str)
-                print(str(x_robot), " , ", str(ang_vel), ","+str(theta), ",", left_rpm, right_rpm)
+                print("Linear:", str(x_robot), ", Angular: ", str(ang_vel), "Left, Right RPMs: ", left_rpm, right_rpm)
                 self.t.angular.z = self.rate_*ang_vel/1.6
                 self.t.linear.x = x_robot/7.0
                 self.pub_move.publish(self.t)
@@ -64,13 +58,11 @@ class Robot:
         
         if msg.data==True:
             self.flag=True
-        else:
-            self.flag=False
+        # else:
+        #     self.flag=False
 
 
 if __name__ == '__main__':
-
-    
     r=Robot()
     read = False
     states = []
@@ -79,18 +71,12 @@ if __name__ == '__main__':
         pass
     while (read == False):
         try:
-            # print('Inside try')
-            rp = rospkg.RosPack()
-            package_path = rp.get_path("astar_turtlebot")
-            print(package_path)
-            filepath = os.path.join(package_path,'src/actions.txt')
-            print(filepath)
-            with open(filepath, 'r') as f:
-                # print('Inside while')
+            with open("actions.txt", 'r') as f:
                 # Read the lines of the file
                 lines = f.readlines()
                 lines = [line.strip() for line in lines]
                 for line in lines:
+                    # print(line)
                     values_list = line.split()
                     values_tuple = (int(values_list[0]), int(values_list[1]))
                     states.append(values_tuple)

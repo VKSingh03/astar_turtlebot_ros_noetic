@@ -7,6 +7,8 @@ import numpy as np
 import time
 from queue import PriorityQueue
 import cv2
+import rospkg
+import os
 
 # Creating Node Class
 class Astar:
@@ -97,7 +99,7 @@ class Astar:
         h1=self.line_equation(p,v2,v3)>=0 if self.line_equation(v1,v2,v3)>0 else self.line_equation(p,v2,v3)<=0
         h2=self.line_equation(p,v1,v3)>=0 if self.line_equation(v2,v1,v3)>0 else self.line_equation(p,v1,v3)<=0
         h3=self.line_equation(p,v1,v2)>=0 if self.line_equation(v3,v1,v2)>0 else self.line_equation(p,v1,v2)<=0
-        print(h1,h2,h3)
+        # print(h1,h2,h3)
         return h1 and h2 and h3
 
     def obstacle_detect_rectangle(self,point,x,y,width,height):
@@ -226,6 +228,12 @@ class Astar:
         self.rate.sleep()
 
     def back_track(self,tracker,current,img):
+        rp = rospkg.RosPack()
+        package_path = rp.get_path("astar_turtlebot")
+        # print(package_path)
+        filepath = os.path.join(package_path,"src")
+        # print(filepath)
+        os.environ["ROS_HOME"]=filepath
         g_node=current
         points=[]
         points.append(current[6])
@@ -244,7 +252,7 @@ class Astar:
         # Write each sublist to the file, with elements separated by a space
             for row in actions:
                 line = ' '.join(str(elem) for elem in row) + '\n'
-                print(line)
+                # print(line)
                 file.write(line)
         path=[]
         for p in points:
@@ -372,7 +380,6 @@ class Astar:
                                 self.visited[neighbor[4][0],neighbor[4][1]]=neighbor[0]
 
                             else:
-                                print(neighbor)
                                 if self.visited[neighbor[4][0],neighbor[4][1],neighbor[4][2]]>current[5]+cost_of_action:
                                     neighbor[2]=current[3]
                                     neighbor[5]=current[5]+cost_of_action
@@ -386,58 +393,12 @@ class Astar:
         
         cv2.destroyAllWindows()
         tracker.append(current)   
-#         print("Tracker: ",tracker)
         end_time = time.time()
         elapsed_time = end_time - start_time
         print(f"\nExecution time of algorithm: {elapsed_time:.2f} seconds")
         return tracker,current
-    
-# def astar_node():
-#     # Parameters to accept start and goal
-#     rospy.init_node('astar_planner')
-#     initial_point = rospy.get_param('~InitState')
-#     goal_point = rospy.get_param('~GoalState')
-#     leftrpm = rospy.get_param('~LeftRPM')
-#     rightrpm = rospy.get_param('~RightRPM')
-#     object_clear = rospy.get_param('~ObjectClearance')
-#     robot_clear = rospy.get_param('~RobotClearance')
-
-#     init_deg = initial_point[2]
-#     goal_deg = goal_point[2]
-#     # Converting inputs from list to tuple and integer 
-#     start=(int(initial_point[1]*100+100),int(initial_point[0]*100+50),int(init_deg))
-#     goal=(int(goal_point[1]*100+100),int(goal_point[0]*100+50),int(goal_deg))
-
-#     step_size = 10
-
-#     #Creating an instance of A*
-#     map_width = 600
-#     map_height = 200
-#     d_algo = Astar(map_width,map_height,1,start,goal,robot_clear,object_clear,step_size,leftrpm,rightrpm)
-
-#     # Call the game method
-#     d_algo.game()
-
 
 if __name__ == "__main__":
-
-    # parser = argparse.ArgumentParser()
-    # # print("Enter start and goal points as per ROS map coordinates: ")
-    # parser.add_argument("--InitState",nargs='+', type=float, help = 'Initial state for the matrix')
-    # parser.add_argument("--GoalState",nargs='+', type=float, help = 'Goal state for the matrix')
-    # Args = parser.parse_args()
-    # initial_point = Args.InitState
-    # goal_point = Args.GoalState
-    # init_deg = initial_point[2]
-    # goal_deg = goal_point[2]
-    # # Converting inputs from list to tuple and integer 
-    # start=(int(initial_point[1]*100+100),int(initial_point[0]*100+50),int(init_deg))
-    # goal=(int(goal_point[1]*100+100),int(goal_point[0]*100+50),int(goal_deg))
-    # # print(start, ", ", goal)
-    # robot_clear = int(input("Enter Robot Clearance: "))
-    # object_clear = int(input("Enter Object Clearance: "))
-    # # step_size = int(input('Enter Step Size: '))
-    # step_size = 10
     robot_clear=int(input("Enter robot clearance: "))
     obj_clear=int(input("Enter object clearance: "))
     left_rpm=int(input("Enter robot left rpm: "))
@@ -449,8 +410,6 @@ if __name__ == "__main__":
     d_algo = Astar(map_width,map_height,1,robot_clear,obj_clear,left_rpm,right_rpm)
 
     # Call the game method
-    
-
     try:
         d_algo.game()
     except rospy.ROSInterruptException:
