@@ -1,21 +1,15 @@
-# Project 3 
-# Submission By: Shantanu Parab (sparab), Vineet Singh (vsingh03)
+#!/usr/bin/env python3
 
-# GITHUB Link: https://github.com/VKSingh03/Astar-on-turtlebot.git
-
-
-# Imports
+import rospy
 import math
 import numpy as np
 import time
 from queue import PriorityQueue
 import cv2
-import argparse
-import matplotlib.pyplot as plt
 
 # Creating Node Class
 class Astar:
-    def __init__(self,width,height,scale,start,goal,robot_clear,obj_clear,step_size):
+    def __init__(self,width,height,scale,start,goal,robot_clear,obj_clear,step_size,leftrpm,rightrpm):
         
         # Get the video dimensions and FPS
         self.result = cv2.VideoWriter("Astar02.avi", cv2.VideoWriter_fourcc(*'MJPG'), 600, (width, height))
@@ -30,6 +24,8 @@ class Astar:
         self.frame_info=[]
         self.ROBOT=robot_clear
         self.OBJ=obj_clear
+        self.LEFTRPM = leftrpm
+        self.RIGHTRPM = rightrpm
 
         # Define Colors
         self.background=(255,255,255)
@@ -241,8 +237,7 @@ class Astar:
         for i in range(len(path) - 1):
             img=cv2.line(img, path[i], path[i+1], self.track_color, thickness=2)
         return img
-    
-        
+      
     def action_set(self,current,action):
         t=0
         r= 0.038*10
@@ -298,7 +293,6 @@ class Astar:
                 return True
         return False
     
-    
     def video(self):
         for current,neighbor in self.frame_info:
             self.draw_vector(current,neighbor)
@@ -317,9 +311,9 @@ class Astar:
         start=(start_cost_to_goal,start_cost_to_goal,0,0,self.START,0,[(self.START[1],self.START[0])],[0,0])
         goal=(float('inf'),0,None,None,self.GOAL,None)
         # Left Wheel
-        RPM1=int(input("Enter RPM1 (Left wheel RPM): "))
+        RPM1=int(self.LEFTRPM)
         # Right Wheel
-        RPM2=int(input("Enter RPM2 (Right wheel RPM): "))
+        RPM2=int(self.RIGHTRPM)
 #         RPM1,RPM2=30,40
         actions=[[0,RPM1],[RPM1,0],[RPM1,RPM1],[0,RPM2],[RPM2,0],[RPM2,RPM2],[RPM1,RPM2],[RPM2,RPM1]]
         # Create an open list
@@ -382,32 +376,62 @@ class Astar:
         print(f"\nExecution time of algorithm: {elapsed_time:.2f} seconds")
         return tracker,current
     
-
-if __name__ == "__main__":
-
+def astar_node():
     # Parameters to accept start and goal
-    parser = argparse.ArgumentParser()
-    # print("Enter start and goal points as per ROS map coordinates: ")
-    parser.add_argument("--InitState",nargs='+', type=float, help = 'Initial state for the matrix')
-    parser.add_argument("--GoalState",nargs='+', type=float, help = 'Goal state for the matrix')
-    Args = parser.parse_args()
-    initial_point = Args.InitState
-    goal_point = Args.GoalState
+    rospy.init_node('astar_planner')
+    initial_point = rospy.get_param('~InitState')
+    goal_point = rospy.get_param('~GoalState')
+    leftrpm = rospy.get_param('~LeftRPM')
+    rightrpm = rospy.get_param('~RightRPM')
+    object_clear = rospy.get_param('~ObjectClearance')
+    robot_clear = rospy.get_param('~RobotClearance')
+
     init_deg = initial_point[2]
     goal_deg = goal_point[2]
     # Converting inputs from list to tuple and integer 
     start=(int(initial_point[1]*100+100),int(initial_point[0]*100+50),int(init_deg))
     goal=(int(goal_point[1]*100+100),int(goal_point[0]*100+50),int(goal_deg))
-    # print(start, ", ", goal)
-    robot_clear = int(input("Enter Robot Clearance: "))
-    object_clear = int(input("Enter Object Clearance: "))
-    # step_size = int(input('Enter Step Size: '))
+
     step_size = 10
 
     #Creating an instance of A*
     map_width = 600
     map_height = 200
-    d_algo = Astar(map_width,map_height,1,start,goal,robot_clear,object_clear,step_size)
+    d_algo = Astar(map_width,map_height,1,start,goal,robot_clear,object_clear,step_size,leftrpm,rightrpm)
 
     # Call the game method
     d_algo.game()
+
+
+if __name__ == "__main__":
+
+    # parser = argparse.ArgumentParser()
+    # # print("Enter start and goal points as per ROS map coordinates: ")
+    # parser.add_argument("--InitState",nargs='+', type=float, help = 'Initial state for the matrix')
+    # parser.add_argument("--GoalState",nargs='+', type=float, help = 'Goal state for the matrix')
+    # Args = parser.parse_args()
+    # initial_point = Args.InitState
+    # goal_point = Args.GoalState
+    # init_deg = initial_point[2]
+    # goal_deg = goal_point[2]
+    # # Converting inputs from list to tuple and integer 
+    # start=(int(initial_point[1]*100+100),int(initial_point[0]*100+50),int(init_deg))
+    # goal=(int(goal_point[1]*100+100),int(goal_point[0]*100+50),int(goal_deg))
+    # # print(start, ", ", goal)
+    # robot_clear = int(input("Enter Robot Clearance: "))
+    # object_clear = int(input("Enter Object Clearance: "))
+    # # step_size = int(input('Enter Step Size: '))
+    # step_size = 10
+
+    # #Creating an instance of A*
+    # map_width = 600
+    # map_height = 200
+    # d_algo = Astar(map_width,map_height,1,start,goal,robot_clear,object_clear,step_size)
+
+    # # Call the game method
+    # d_algo.game()
+
+    try:
+        astar_node()
+    except rospy.ROSInterruptException:
+        pass

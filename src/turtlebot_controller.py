@@ -58,14 +58,14 @@ if __name__ == '__main__':
     states = []
     while (read == False):
         try:
-            print('Inside try')
+            # print('Inside try')
             rp = rospkg.RosPack()
             package_path = rp.get_path("astar_turtlebot")
             print(package_path)
             filepath = os.path.join(package_path,'src/actions.txt')
             print(filepath)
             with open(filepath, 'r') as f:
-                print('Inside while')
+                # print('Inside while')
                 # Read the lines of the file
                 lines = f.readlines()
                 lines = [line.strip() for line in lines]

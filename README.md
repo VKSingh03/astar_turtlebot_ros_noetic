@@ -11,7 +11,7 @@
 - vsingh03 - 119123614
 
 ## Libraries used are: 
->numpy, argparse, timeit, queue, OpenCV, math 
+>numpy, timeit, queue, OpenCV, math 
 
 <!-- ## Source Code Files
 
@@ -39,7 +39,13 @@ Note: The output videos in both cases is created as .avi which is converted to .
 
 ## How to Run the Program:
 
-To run the program, clone the package in catkin workspace and then follow the below steps:  
+To run the program, clone the package in catkin workspace and then follow the below steps:
++ Open the terminal and move to catkin workspace where package is cloned. Move to root of the workspace. 
++ Build the Catkin workspace 
++ Source the workspace after build is complete
++ Run the following command 
+
+    roslaunch astar_turtlebot gazebo.launch init_state:="0 0 0" goal_state:="4.8 -0.5 0" rpm1:=10 rpm2:=15 obj_clear:=5 robot_clear:=20
 
 Output Video: https://youtu.be/8U9iF_QIr0E
 
@@ -47,6 +53,7 @@ Output Video: https://youtu.be/8U9iF_QIr0E
 Note: 
 + The speeds for Left and right wheels should be given after consideration of turtlebot max limit for speed/acceleration. For proper outputs, keep it within 20 rpm for each wheel. 
 + The inputs and goal points should be given with reference to ROS map. If initial state is given other than (0 0 0), then it should also be changed in Launch file before starting the node. 
++ As the package already contains an actions.txt, the turtlebot will not wait for the new file to be generated. If a new action set is to be generated, the existing actions.txt should be deleted and then the above launch file should be run again. 
 
 ## Github Link
 [Repository](https://github.com/VKSingh03/astar_turtlebot_ros_noetic.git)
